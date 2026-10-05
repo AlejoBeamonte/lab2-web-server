@@ -13,6 +13,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath
@@ -104,6 +105,52 @@ class TimeControllerTest {
             .andExpect(content().string(org.hamcrest.Matchers.containsString("lang=\"es\"")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("Hora actual del servidor")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString(FIXED_TIME.toString())))
+    }
+
+    @Test
+    fun timeIsNotModifiedWhenEtagMatches() {
+        val response =
+            mockMvc
+                .perform(
+                    get("/time")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, "en"),
+                ).andExpect(status().isOk)
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andReturn()
+                .response
+        val etag = requireNotNull(response.getHeader(HttpHeaders.ETAG))
+
+        mockMvc
+            .perform(
+                get("/time")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, "en")
+                    .header(HttpHeaders.IF_NONE_MATCH, etag),
+            ).andExpect(status().isNotModified)
+    }
+
+    @Test
+    fun timeIsNotModifiedWhenLastModifiedMatches() {
+        val response =
+            mockMvc
+                .perform(
+                    get("/time")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, "en"),
+                ).andExpect(status().isOk)
+                .andExpect(header().exists(HttpHeaders.LAST_MODIFIED))
+                .andReturn()
+                .response
+        val lastModified = requireNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED))
+
+        mockMvc
+            .perform(
+                get("/time")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, "en")
+                    .header(HttpHeaders.IF_MODIFIED_SINCE, lastModified),
+            ).andExpect(status().isNotModified)
     }
 
     @Test

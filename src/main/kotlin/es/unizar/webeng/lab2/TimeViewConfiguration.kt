@@ -19,8 +19,12 @@ class TimeViewConfiguration(
             JacksonJsonView().apply {
                 setModelKey(TIME_MODEL_ATTRIBUTE)
                 setExtractValueFromSingleKeyModel(true)
+                setDisableCaching(false)
             },
-            JacksonXmlView().apply { setModelKey(TIME_MODEL_ATTRIBUTE) },
+            JacksonXmlView().apply {
+                setModelKey(TIME_MODEL_ATTRIBUTE)
+                setDisableCaching(false)
+            },
         )
         registry.viewResolver(thymeleafViewResolver)
     }
