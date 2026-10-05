@@ -1,3 +1,6 @@
 server:
   ssl:
     enabled: false
+  compression:
+    enabled: true
+    min-response-size: 1B

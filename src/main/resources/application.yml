@@ -8,3 +8,6 @@ server:
     key-alias: localhost
   http2:
     enabled: true
+  compression:
+    enabled: true
+    min-response-size: 1B
