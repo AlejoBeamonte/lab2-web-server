@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath
 import java.time.LocalDateTime
 
 @SpringBootTest
@@ -31,6 +32,32 @@ class TimeControllerTest {
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.time").exists())
             .andExpect(jsonPath("$.time").value(FIXED_TIME.toString()))
+    }
+
+    @Test
+    fun timeIsXml() {
+        mockMvc
+            .perform(get("/time").accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk)
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+            .andExpect(xpath("/TimeDTO/time").string(FIXED_TIME.toString()))
+    }
+
+    @Test
+    fun timeIsHtml() {
+        mockMvc
+            .perform(get("/time").accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk)
+            .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Current server time")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString(FIXED_TIME.toString())))
+    }
+
+    @Test
+    fun unsupportedTimeRepresentationIsNotAcceptable() {
+        mockMvc
+            .perform(get("/time").accept(MediaType.APPLICATION_PDF))
+            .andExpect(status().isNotAcceptable)
     }
 
     @TestConfiguration(proxyBeanMethods = false)
