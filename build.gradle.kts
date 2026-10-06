@@ -38,6 +38,7 @@ dependencies {
 
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.thymeleaf)
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml")
     implementation(libs.jackson.module.kotlin)
     runtimeOnly(libs.kotlin.reflect)
 
